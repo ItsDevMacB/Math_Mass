@@ -31,6 +31,25 @@ coverage
 # Cypress
 /cypress/videos/
 /cypress/screenshots/
+/cypress/downloads/
 
 # Vitest
 __screenshots__/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Service Worker
+service-worker.js
+service-worker.js.map
+
+# PWA
+workbox-*
+
+# IDE
+.vscode
+
+# OS
+Thumbs.db
