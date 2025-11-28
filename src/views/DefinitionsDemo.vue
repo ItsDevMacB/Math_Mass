@@ -204,6 +204,7 @@ import { FractionExerciseGenerator } from '@/services/FractionExerciseGenerator'
 import type { ExerciseQuestion } from '@/services/FractionExerciseGenerator'
 import { useKaTeX } from '@/composables/useKaTeX'
 import { useLessonStore } from '@/stores/lessonStore'
+import { useNotifications } from '@/composables/useNotifications'
 
 const breadcrumbs = [
   { label: 'Inicio', path: '/' },
@@ -249,6 +250,7 @@ const exercises = ref<ExerciseQuestion[]>([])
 const selectedAnswers = ref<Record<number, string>>({})
 const showResults = ref(false)
 const lessonStore = useLessonStore()
+const { showExamResultNotification } = useNotifications()
 
 const currentLessonId = computed(() => {
   const tema = temas.find((t) => t.id === currentTema.value)
@@ -276,7 +278,7 @@ const accuracyColor = computed(() => {
 
 // Métodos
 const generateExercises = () => {
-  exercises.value = FractionExerciseGenerator.generateForLesson(currentLessonId.value, 15, 'medio')
+  exercises.value = FractionExerciseGenerator.generateForLesson(currentLessonId.value, 10, 'medio')
   selectedAnswers.value = {}
   showResults.value = false
 }
@@ -300,6 +302,9 @@ const verifyAnswers = () => {
     }
   }
 
+  // Calcular el porcentaje
+  const porcentaje = Math.round((correctasActual / exercises.value.length) * 100)
+
   // Actualizar resultado del examen (solo guarda si es el mejor)
   lessonStore.updateExamResult(currentLessonId.value, exercises.value.length, correctasActual)
 
@@ -307,6 +312,12 @@ const verifyAnswers = () => {
   if (correctasActual === exercises.value.length) {
     lessonStore.completeLesson(currentLessonId.value)
   }
+
+  // Mostrar notificación con el resultado
+  console.log('📊 Mostrando notificación de resultado:', porcentaje + '%')
+  setTimeout(() => {
+    showExamResultNotification(porcentaje)
+  }, 500)
 }
 
 const resetExercises = () => {

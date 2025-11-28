@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLessonStore } from '@/stores/lessonStore'
+import { useNotifications } from '@/composables/useNotifications'
 import {
   PieChart,
   Repeat,
@@ -21,8 +22,32 @@ import {
 
 const router = useRouter()
 const lessonStore = useLessonStore()
+const { showWelcomeNotification, showExamStartNotification, showExamResultNotification } =
+  useNotifications()
 const showFilter = ref(false)
 const activeFilter = ref<'todas' | 'completadas' | 'en-progreso' | 'nuevas'>('todas')
+
+// Funciones de prueba para notificaciones (TEMPORAL - para debugging)
+const testWelcomeNotification = () => {
+  console.log('🧪 Probando notificación de bienvenida...')
+  showWelcomeNotification()
+}
+
+const testExamStartNotification = () => {
+  console.log('🧪 Probando notificación de inicio de examen...')
+  showExamStartNotification()
+}
+
+const testResultNotifications = () => {
+  console.log('🧪 Probando notificaciones de resultado...')
+  const scores = [100, 90, 70, 40, 10]
+  scores.forEach((score, index) => {
+    setTimeout(() => {
+      console.log(`   Mostrando resultado para ${score}%`)
+      showExamResultNotification(score)
+    }, index * 3000)
+  })
+}
 
 // Mapa de iconos
 const iconMap: Record<string, typeof PieChart> = {
@@ -134,6 +159,47 @@ const toggleFilter = () => {
               <RouterLink to="/about" class="btn btn-secondary btn-lg">
                 Ver más información
               </RouterLink>
+            </div>
+
+            <!-- Botones de Prueba de Notificaciones (TEMPORAL - DEBUGGING) -->
+            <div
+              style="
+                margin-top: 20px;
+                padding: 15px;
+                background: #fee;
+                border: 2px dashed #f00;
+                border-radius: 8px;
+              "
+            >
+              <p style="font-weight: bold; margin-bottom: 10px; color: #c00">
+                🧪 PANEL DE PRUEBAS - NOTIFICACIONES
+              </p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <button
+                  @click="testWelcomeNotification"
+                  class="btn btn-sm"
+                  style="background: #3b82f6; color: white"
+                >
+                  Test Bienvenida
+                </button>
+                <button
+                  @click="testExamStartNotification"
+                  class="btn btn-sm"
+                  style="background: #10b981; color: white"
+                >
+                  Test Inicio Examen
+                </button>
+                <button
+                  @click="testResultNotifications"
+                  class="btn btn-sm"
+                  style="background: #f59e0b; color: white"
+                >
+                  Test Resultados (5)
+                </button>
+              </div>
+              <p style="font-size: 12px; margin-top: 8px; color: #666">
+                Abre la consola (F12) para ver los logs. Eliminar este panel antes de producción.
+              </p>
             </div>
           </div>
           <div class="flex items-center justify-center hero-image">

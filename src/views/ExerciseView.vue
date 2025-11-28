@@ -163,21 +163,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ExerciseDisplay from '@/components/exercise/ExerciseDisplay.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 import { useExerciseStore } from '@/stores/exerciseStore'
 import { useIndexedDB } from '@/composables/useIndexedDB'
+import { useNotifications } from '@/composables/useNotifications'
 
 const breadcrumbs = [{ label: 'Inicio', path: '/' }, { label: 'Ejercicios' }]
 
 const router = useRouter()
 const exerciseStore = useExerciseStore()
 const { saveExercise } = useIndexedDB()
+const { showExamStartNotification, showExamResultNotification } = useNotifications()
 
 const showSummary = ref(false)
 const useKaTeX = ref(true)
+
+onMounted(() => {
+  // Mostrar notificación al iniciar el examen
+  if (exerciseStore.currentExercise && exerciseStore.currentExerciseIndex === 0) {
+    setTimeout(() => {
+      showExamStartNotification()
+    }, 1000)
+  }
+})
 
 const handleSubmit = async (answer: number) => {
   exerciseStore.submitAnswer(answer)
@@ -193,6 +204,10 @@ const handleSubmit = async (answer: number) => {
       exerciseStore.nextExercise()
     } else {
       showSummary.value = true
+      // Mostrar notificación con el resultado final
+      setTimeout(() => {
+        showExamResultNotification(exerciseStore.accuracy)
+      }, 500)
     }
   }, 2000)
 }
@@ -200,6 +215,10 @@ const handleSubmit = async (answer: number) => {
 const handleNext = () => {
   if (!exerciseStore.nextExercise()) {
     showSummary.value = true
+    // Mostrar notificación con el resultado
+    setTimeout(() => {
+      showExamResultNotification(exerciseStore.accuracy)
+    }, 500)
   }
 }
 
@@ -209,6 +228,11 @@ const handlePrevious = () => {
 
 const handleFinish = () => {
   showSummary.value = true
+  // Mostrar notificación con el resultado
+  const score = exerciseStore.accuracy
+  setTimeout(() => {
+    showExamResultNotification(score)
+  }, 500)
 }
 
 const backToGenerate = async () => {
